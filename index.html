@@ -13,8 +13,8 @@
     <div class="container text-center">
         <div class="row align-items-start">
           <div class="col">
-            <label for="nome" class="form-label">Nome</label>
-            <input type="text" class="form-control" id="nome">
+            <label for="name" class="form-label">Nome</label>
+            <input type="text" class="form-control" id="name">
             <div class="form-text">Digite um nome de um repositorio</div>
           </div>
           <div class="col">
@@ -46,12 +46,128 @@
               </div>
           </div>
         </div>
+        <div class="row align-items-start">
+          <div class="col">
+            <ul class="list">
+            </ul>
+          </div>
+        </div>
       </div>
     <script
   src="https://code.jquery.com/jquery-3.6.4.min.js"
   integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
   crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <script>
+      
+      var repositories;
+
+      $(document).ready(function() {
+        searchWithoutFilter();
+      });
+      
+      $('#name').change(function (e) {
+        
+        if($('#name').val() == ""){
+          searchWithoutFilter();
+        }else{
+          searchRepositoryByName($('#name').val());
+        }
+      });
+
+      $('#sort').change(function (e) {
+        
+        if($('#sort').val() == 'updated'){
+          searchByLastCommit($('#name').val());
+        }else{
+          searchRepositoryByName($('#name').val());
+        }
+      });
+
+      $('#license').change(function (e) {
+        
+        if($('#license').is(':checked')){
+
+          let array = repositories;
+          if(array.items != undefined){
+            array = array.items;
+          }
+          array = array.filter(function (data) { 
+            return data.license != null;
+          });
+          $('.list').empty();
+          array.forEach(element => $('.list').append('<li class="list-group-item">' + element.name + '</li>'));
+        }
+      });
+
+      $('#default_branch').change(function (e) {
+        if($('#default_branch').is(':checked')){
+
+          let array = repositories;
+
+          if(array.items != undefined){
+            array = array.items;
+          }
+
+          array = array.filter(function (data) { 
+            return data.default_branch == 'master';
+          });
+
+          $('.list').empty();
+          array.forEach(element => $('.list').append('<li class="list-group-item">' + element.name + '</li>'));
+        }
+      });
+
+      $('#language_php').change(function (e) {
+        if($('#language_php').is(':checked')){
+
+          let array = repositories;
+
+          if(array.items != undefined){
+            array = array.items;
+          }
+
+          array = array.filter(function (data) { 
+            return data.language == 'PHP';
+          });
+
+          $('.list').empty();
+          array.forEach(element => $('.list').append('<li class="list-group-item">' + element.name + '</li>'));
+        }
+      });
+
+
+      function searchRepositoryByName(name){
+        $.ajax({
+          url: "https://api.github.com/search/repositories?q=user:GuilhermeAltmann " + name,
+        }).done(function(data) {
+          $('.list').empty();
+          repositories = data;
+          data.items.forEach(element => $('.list').append('<li class="list-group-item">' + element.name + '</li>'));
+        });
+      }
+      
+      function searchWithoutFilter(){
+        $('.list').empty();
+        $.ajax({
+          url: "https://api.github.com/users/GuilhermeAltmann/repos",
+        }).done(function(data) {
+          $('.list').empty();
+          repositories = data;
+          data.forEach(element => $('.list').append('<li class="list-group-item">' + element.name + '</li>'));
+        });
+      }
+
+      function searchByLastCommit(name){
+        $.ajax({
+          url: "https://api.github.com/search/repositories?q=user:GuilhermeAltmann " + name + "&sort=updated",
+        }).done(function(data) {
+          $('.list').empty();
+          repositories = data;
+          data.items.forEach(element => $('.list').append('<li class="list-group-item">' + element.name + '</li>'));
+        });
+      }
+    </script>
 </body>
 </html>
 
